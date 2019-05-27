@@ -3,7 +3,7 @@ import certifi
 import json
 from ssl import create_default_context
 from elasticsearch import Elasticsearch
-from legacy import settings
+from legacy import settings, querybuilder
 
 log = logging.getLogger(__name__)
 
@@ -140,6 +140,45 @@ def lista_yrken_by_string(benamning):
                                       settings.OCCUPATION + ".legacy_ams_taxonomy_id",
                                       0,
                                       benamning))
+
+
+def matcha(query_args, sida=1, size=20):
+    offset = _calculate_offset(sida, size)
+    last_id = None
+    number_of_pages = 0
+    base_offset = offset
+    while offset + size > 10000:
+        log.debug("Big offset loop. Offset: %d, size: %d" % (offset, size))
+        catchup = querybuilder.build_query(query_args, offset-1, 1, last_id)
+        response = elastic.search(index=settings.ES_INDEX, body=catchup)
+        # Must calculate number of pages here, because it will be useless when we're
+        # fudging with pagination
+        if not number_of_pages:
+            total_hits = response.get('hits', {}).get('total', {}).get('value', 0)
+            number_of_pages = (total_hits // size + (total_hits % size > 0)
+                               if size else 0)
+        hits = response.get('hits', {}).get('hits', [])
+        offset = offset - base_offset
+        if hits:
+            last_id = hits[0]['_id']
+
+    dsl = querybuilder.build_query(query_args, offset, size, last_id)
+    response = elastic.search(index=settings.ES_INDEX, body=dsl)
+    if not number_of_pages:
+        total_hits = response['hits']['total']['value']
+        number_of_pages = (total_hits // size + (total_hits % size > 0)
+                           if size else 0)
+    response['hits']['meta'] = {
+        'number_of_pages': number_of_pages,
+        'number_of_positions': response['aggregations']['positions']['value']
+    }
+    return response
+
+
+def _calculate_offset(pagenumber, rows):
+    if pagenumber == 1:
+        return 0
+    return (pagenumber - 1) * rows
 
 
 def _build_list(listnamn, antal_annons, antal_plats, sokdata):

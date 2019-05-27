@@ -1,5 +1,5 @@
 from simplexml import dumps
-from flask_restplus import Api, Namespace, reqparse
+from flask_restplus import Api, Namespace, reqparse, inputs
 from flask import make_response
 
 api = Api(version='1.0', title='Platsannonser',
@@ -30,13 +30,16 @@ yrkesgrupp_query.add_argument('yrkesomradeid', type=int, required=True)
 yrkes_query = reqparse.RequestParser()
 yrkes_query.add_argument('yrkesgruppid', type=int, required=True)
 
-yrkespath_query = reqparse.RequestParser()
-yrkespath_query.add_argument('benamning', required=True)
-
 legacy_query = reqparse.RequestParser()
+legacy_query.add_argument('landid', type=int)
 legacy_query.add_argument('lanid', type=int)
 legacy_query.add_argument('kommunid', type=int)
 legacy_query.add_argument('nyckelord')
 legacy_query.add_argument('yrkesid', type=int)
-legacy_query.add_argument('sida', type=int)
-legacy_query.add_argument('antalrader', type=int)
+legacy_query.add_argument('yrkesgruppid', type=int)
+legacy_query.add_argument('yrkesomradeid', type=int)
+legacy_query.add_argument('varaktighetid', type=int)
+legacy_query.add_argument('anstallningstyp', type=int)
+legacy_query.add_argument('organisationsnummer', type=int)
+legacy_query.add_argument('sida', type=int, default=1)
+legacy_query.add_argument('antalrader', type=inputs.int_range(0, 10000), default=20)
