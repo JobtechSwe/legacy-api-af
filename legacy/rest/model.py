@@ -1,10 +1,12 @@
 from flask_restplus import fields
 from legacy.rest import ns_legacy as api
 
+base_url = "https://www.arbetsformedlingen.se/For-arbetssokande/Platsbanken/annonser"
+
 
 class BaseUrl(fields.Raw):
     def format(self, value):
-        return "https://www.arbetsformedlingen.se/Tjanster/lArbetssokande/Platsbanken/annonser/%s" % value
+        return "%s/%s" % (base_url, value)
 
 
 annons = api.model('matchnindsdata', {
@@ -29,8 +31,8 @@ annons = api.model('matchnindsdata', {
 })
 
 annonslista = api.model('resultat', {
-    'antal_platsannonser': fields.Integer(attribute='total.value'),
-    'antal_platsannonser_exakta': fields.Integer(attribute='total.value'),
+    'antal_platsannonser': fields.Integer(attribute='meta.total_hits'),
+    'antal_platsannonser_exakta': fields.Integer(attribute='meta.total_hits'),
     'antal_platsannonser_narliggande': fields.Integer(default=0),
     'antal_platserTotal': fields.Integer(attribute='meta.number_of_positions'),
     'antal_sidor': fields.Integer(attribute='meta.number_of_pages'),

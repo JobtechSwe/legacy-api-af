@@ -56,5 +56,5 @@ def build_query(args, offset, size, start_from=None):
                 }}
             )
 
-    log.debug("QUERY: %s" % json.dumps(dsl, indent=2))
+    # log.debug("QUERY: %s" % json.dumps(dsl, indent=2))
     return dsl

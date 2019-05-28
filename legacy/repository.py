@@ -142,35 +142,57 @@ def lista_yrken_by_string(benamning):
                                       benamning))
 
 
-def matcha(query_args, sida=1, size=20):
-    offset = _calculate_offset(sida, size)
+def _calculate_pages(args, size):
+    pages = querybuilder.build_query(args, 0, 0)
+    response = elastic.search(index=settings.ES_INDEX, body=pages)
+
+    total_hits = response.get('hits', {}).get('total', {}).get('value', 0)
+    number_of_pages = (total_hits // size + (total_hits % size > 0)
+                       if size else 0)
+    positions = response['aggregations']['positions']['value']
+    return (total_hits, number_of_pages, positions)
+
+
+def _find_highest_id(query_args, offset, size):
+    next_offset = offset
     last_id = None
-    number_of_pages = 0
-    base_offset = offset
-    while offset + size > 10000:
-        log.debug("Big offset loop. Offset: %d, size: %d" % (offset, size))
-        catchup = querybuilder.build_query(query_args, offset-1, 1, last_id)
+    while next_offset > 10000:
+        catchup = querybuilder.build_query(query_args, 9999, 1, last_id)
         response = elastic.search(index=settings.ES_INDEX, body=catchup)
-        # Must calculate number of pages here, because it will be useless when we're
-        # fudging with pagination
-        if not number_of_pages:
-            total_hits = response.get('hits', {}).get('total', {}).get('value', 0)
-            number_of_pages = (total_hits // size + (total_hits % size > 0)
-                               if size else 0)
         hits = response.get('hits', {}).get('hits', [])
-        offset = offset - base_offset
         if hits:
             last_id = hits[0]['_id']
+            log.debug("Updating last id for pagination: %s" % last_id)
+        next_offset = next_offset - 10000
 
-    dsl = querybuilder.build_query(query_args, offset, size, last_id)
-    response = elastic.search(index=settings.ES_INDEX, body=dsl)
-    if not number_of_pages:
-        total_hits = response['hits']['total']['value']
-        number_of_pages = (total_hits // size + (total_hits % size > 0)
-                           if size else 0)
+    next_offset = next_offset if next_offset > 0 else 0
+
+    while next_offset+size > 10000:
+        next_offset = next_offset - size if next_offset > size else 0
+        catchup = querybuilder.build_query(query_args, next_offset, 1, last_id)
+        response = elastic.search(index=settings.ES_INDEX, body=catchup)
+        hits = response.get('hits', {}).get('hits', [])
+        if hits:
+            last_id = hits[0]['_id']
+            log.debug("Updating last id for pagination: %s" % last_id)
+            log.debug("Pagination: Filter from %s with new offset: %d" % (last_id, next_offset))
+    return (last_id, next_offset)
+
+
+def matcha(query_args, sida=1, size=20):
+    offset = _calculate_offset(sida, size)
+    (total_hits, number_of_pages, positions) = _calculate_pages(query_args, size)
+    if sida <= number_of_pages:
+        (last_id, new_offset) = _find_highest_id(query_args, offset, size)
+        dsl = querybuilder.build_query(query_args, new_offset, size, last_id)
+        response = elastic.search(index=settings.ES_INDEX, body=dsl)
+    else:
+        response = dict()
+        response['hits'] = {'hits': []}
     response['hits']['meta'] = {
+        'total_hits': total_hits,
+        'number_of_positions': positions,
         'number_of_pages': number_of_pages,
-        'number_of_positions': response['aggregations']['positions']['value']
     }
     return response
 
