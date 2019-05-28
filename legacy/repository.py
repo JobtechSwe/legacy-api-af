@@ -190,6 +190,13 @@ def matcha(query_args, sida=1, size=20):
         (last_id, new_offset) = _find_highest_id(query_args, offset, size)
         dsl = querybuilder.build_query(query_args, new_offset, size, last_id, sort_by_id)
         response = elastic.search(index=settings.ES_INDEX, body=dsl)
+        max_score = response['hits']['max_score']
+        if not sort_by_id:
+            # If using relevance, calculate score for each hit
+            for hit in response.get('hits', {}).get('hits', []):
+                doc_score = hit['_score']
+                hit['relevans'] = int((doc_score / max_score)*100)
+                print("CALCULATED SCORE", hit['relevans'])
     else:
         response = dict()
         response['hits'] = {'hits': []}
