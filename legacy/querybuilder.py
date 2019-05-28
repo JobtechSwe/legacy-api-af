@@ -5,9 +5,11 @@ from legacy import settings
 log = logging.getLogger(__name__)
 
 
-def build_query(args, offset, size, start_from=None):
+def build_query(args, offset, size, start_from=None, sort_by_id = False):
     dsl = {"query": {"bool": {"must": []}}, "track_total_hits": True,
-           "from": offset, "size": size, "sort": {"id": "ASC"}}
+           "from": offset, "size": size}
+    if sort_by_id:
+        dsl['sort'] = {"id": "ASC"}
     dsl['aggs'] = {
         "positions": {
             "sum": {"field": settings.NUMBER_OF_VACANCIES}
@@ -56,5 +58,30 @@ def build_query(args, offset, size, start_from=None):
                 }}
             )
 
-    # log.debug("QUERY: %s" % json.dumps(dsl, indent=2))
+    if args['sokdatum']:
+        dsl['query']['bool']['filter'].append(
+            {"range": {settings.PUBLICATION_DATE: {"gte": args['sokdatum'].isoformat()}}}
+        )
+
+    if args['nyckelord']:
+        dsl['query']['bool']['must'].append(_build_freetext_query(args['nyckelord']))
+
+    log.debug("QUERY: %s" % json.dumps(dsl, indent=2))
     return dsl
+
+
+def _build_freetext_query(querystring):
+    return {
+        "multi_match": {
+            "query": querystring,
+            "type": "cross_fields",
+            "operator": "and",
+            "fields": [settings.DESCRIPTION_TEXT,
+                       settings.HEADLINE,
+                       settings.OCCUPATION + ".label",
+                       settings.WORKPLACE_ADDRESS_CITY,
+                       settings.DURATION + ".label",
+                       settings.WORKING_HOURS_TYPE + ".label",
+                       settings.SALARY_TYPE + ".label"]
+        }
+    }

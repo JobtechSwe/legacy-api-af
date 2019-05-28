@@ -41,3 +41,7 @@ REMOVED = 'removed'
 DURATION = 'duration'
 EMPLOYMENT_TYPE = 'employment_type'
 EMPLOYER_ORGANIZATION_NUMBER = 'employer.organization_number'
+DESCRIPTION_TEXT = "description.text"
+HEADLINE = "headline"
+WORKING_HOURS_TYPE = "working_hours_type"
+SALARY_TYPE = 'salary_type'

@@ -157,7 +157,7 @@ def _find_highest_id(query_args, offset, size):
     next_offset = offset
     last_id = None
     while next_offset > 10000:
-        catchup = querybuilder.build_query(query_args, 9999, 1, last_id)
+        catchup = querybuilder.build_query(query_args, 9999, 1, last_id, True)
         response = elastic.search(index=settings.ES_INDEX, body=catchup)
         hits = response.get('hits', {}).get('hits', [])
         if hits:
@@ -169,7 +169,7 @@ def _find_highest_id(query_args, offset, size):
 
     while next_offset+size > 10000:
         next_offset = next_offset - size if next_offset > size else 0
-        catchup = querybuilder.build_query(query_args, next_offset, 1, last_id)
+        catchup = querybuilder.build_query(query_args, next_offset, 1, last_id, True)
         response = elastic.search(index=settings.ES_INDEX, body=catchup)
         hits = response.get('hits', {}).get('hits', [])
         if hits:
@@ -180,11 +180,15 @@ def _find_highest_id(query_args, offset, size):
 
 
 def matcha(query_args, sida=1, size=20):
+    sort_by_id = False
     offset = _calculate_offset(sida, size)
     (total_hits, number_of_pages, positions) = _calculate_pages(query_args, size)
+    if total_hits > 10000:
+        # Must sort by ID for this query
+        sort_by_id = True
     if sida <= number_of_pages:
         (last_id, new_offset) = _find_highest_id(query_args, offset, size)
-        dsl = querybuilder.build_query(query_args, new_offset, size, last_id)
+        dsl = querybuilder.build_query(query_args, new_offset, size, last_id, sort_by_id)
         response = elastic.search(index=settings.ES_INDEX, body=dsl)
     else:
         response = dict()
