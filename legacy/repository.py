@@ -3,6 +3,7 @@ import certifi
 import json
 from ssl import create_default_context
 from elasticsearch import Elasticsearch
+from flask_restplus import abort
 from legacy import settings, querybuilder
 
 log = logging.getLogger(__name__)
@@ -196,7 +197,6 @@ def matcha(query_args, sida=1, size=20):
             for hit in response.get('hits', {}).get('hits', []):
                 doc_score = hit['_score']
                 hit['relevans'] = int((doc_score / max_score)*100)
-                print("CALCULATED SCORE", hit['relevans'])
     else:
         response = dict()
         response['hits'] = {'hits': []}
@@ -206,6 +206,21 @@ def matcha(query_args, sida=1, size=20):
         'number_of_pages': number_of_pages,
     }
     return response
+
+
+def fetch_platsannons(ad_id):
+    try:
+        query_result = elastic.get(index=settings.ES_INDEX, id=ad_id, ignore=404)
+        if query_result and '_source' in query_result:
+            return query_result
+        else:
+            log.info("Job ad %s not found, returning 404 message" % ad_id)
+            abort(404, 'Ad not found')
+    except exceptions.ConnectionError as e:
+        logging.exception('Failed to connect to elasticsearch: %s' % str(e))
+        abort(500, 'Failed to establish connection to database')
+        return
+    return elastic.get()
 
 
 def _calculate_offset(pagenumber, rows):

@@ -1,4 +1,5 @@
 import logging
+import re
 import json
 from legacy import settings
 
@@ -71,9 +72,20 @@ def build_query(args, offset, size, start_from=None, sort_by_id = False):
 
 
 def _build_freetext_query(querystring):
+    bool_struct = [re.split(' AND ', w) for w in [g for g in re.split(' OR ', querystring) if g.strip()]]
+    shoulds = {"bool": {"should": []}}
+    for should in bool_struct:
+        musts = {"bool": {"must": []}}
+        for must in should:
+            musts['bool']['must'].append(_create_multimatch(must))
+        shoulds['bool']['should'].append(musts)
+    return shoulds
+
+
+def _create_multimatch(word):
     return {
         "multi_match": {
-            "query": querystring,
+            "query": word,
             "type": "cross_fields",
             "operator": "and",
             "fields": [settings.DESCRIPTION_TEXT,

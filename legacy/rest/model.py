@@ -9,7 +9,8 @@ class BaseUrl(fields.Raw):
         return "%s/%s" % (base_url, value)
 
 
-annons = api.model('matchnindsdata', {
+# Search results
+matchningsdata = api.model('matchnindsdata', {
     'annonsid': fields.String(attribute='_source.id'),
     'annonsrubrik': fields.String(attribute='_source.headline'),
     'yrkesbenamnning': fields.String(attribute='_source.occupation.label'),
@@ -30,15 +31,36 @@ annons = api.model('matchnindsdata', {
     'anstallningstyp': fields.String(attribute='_source.employment_type.label'),
 })
 
-annonslista = api.model('resultat', {
+resultat = api.model('resultat', {
     'antal_platsannonser': fields.Integer(attribute='meta.total_hits'),
     'antal_platsannonser_exakta': fields.Integer(attribute='meta.total_hits'),
     'antal_platsannonser_narliggande': fields.Integer(default=0),
     'antal_platserTotal': fields.Integer(attribute='meta.number_of_positions'),
     'antal_sidor': fields.Integer(attribute='meta.number_of_pages'),
-    'matchningsdata': fields.List(fields.Nested(annons), attribute='hits')
+    'matchningsdata': fields.List(fields.Nested(matchningsdata), attribute='hits')
 })
 
-annonsresultat = api.model('matchningslista', {
-    'matchningslista': fields.Nested(annonslista, attribute='hits')
+matchningslista = api.model('matchningslista', {
+    'matchningslista': fields.Nested(resultat, attribute='hits')
+})
+
+# Show jobad
+annons = api.model('annons', {
+    'annonsid': fields.String(attribute='id'),
+    'platsannonsUrl': BaseUrl(attribute='id'),
+    'annonsrubrik': fields.String(attribute='headline'),
+    'annonstext': fields.String(attribute='description.text'),
+    'yrkesbenamning': fields.String(attribute='occupation.label'),
+    'yrkesid': fields.Integer(attribute='occupation.legacy_ams_taxonomy_id'),
+    'publiceraddatum': fields.DateTime(attribute='publication_date'),
+    'antal_platser': fields.Integer(attribute='number_of_vacancies'),
+    'kommunnamn': fields.String(attribute='workplace_address.municipality'),
+    'kommunkod': fields.Integer(attribute='workplace_address.municipality_code'),
+    'antalplatserVisa': fields.Integer(default=1),
+    'anstallningstyp': fields.String(attribute='employment_type.label')
+})
+
+
+platsannons = api.model('platsannons', {
+    'annons': fields.Nested(annons, attribute='_source')
 })

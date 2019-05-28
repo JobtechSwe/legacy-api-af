@@ -68,7 +68,7 @@ class SoklistaYrkenPath(Resource):
 class Matchning(Resource):
 
     @ns_legacy.expect(legacy_query)
-    @ns_legacy.marshal_with(model.annonsresultat)
+    @ns_legacy.marshal_with(model.matchningslista)
     def get(self):
         args = legacy_query.parse_args()
         sida = args.pop('sida')
@@ -81,3 +81,11 @@ class Matchning(Resource):
                   "landid, lanid, anstallningstyp eller omradeid måste vara satta")
         results = repository.matcha(args, sida, rader)
         return results
+
+
+@ns_legacy.route('<platsannonsid>')
+class ShowPlatsannons(Resource):
+
+    @ns_legacy.marshal_with(model.platsannons)
+    def get(self, platsannonsid):
+        return repository.fetch_platsannons(platsannonsid)
