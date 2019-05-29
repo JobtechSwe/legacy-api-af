@@ -2,7 +2,7 @@ import logging
 import certifi
 import json
 from ssl import create_default_context
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, exceptions
 from flask_restplus import abort
 from legacy import settings, querybuilder
 
@@ -212,10 +212,10 @@ def fetch_platsannons(ad_id):
     try:
         query_result = elastic.get(index=settings.ES_INDEX, id=ad_id, ignore=404)
         if query_result and '_source' in query_result:
-            return query_result
+            return {"elastic_result": query_result}
         else:
             log.info("Job ad %s not found, returning 404 message" % ad_id)
-            abort(404, 'Ad not found')
+            abort(404, 'Platsannons saknas')
     except exceptions.ConnectionError as e:
         logging.exception('Failed to connect to elasticsearch: %s' % str(e))
         abort(500, 'Failed to establish connection to database')

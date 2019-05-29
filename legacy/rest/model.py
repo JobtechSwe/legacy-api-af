@@ -60,7 +60,51 @@ annons = api.model('annons', {
     'anstallningstyp': fields.String(attribute='employment_type.label')
 })
 
+annonsvillkor = api.model('villkor', {
+    'varaktighet': fields.String(attribute='duration.label'),
+    'arbetstid': fields.String(attribute='working_hours_type.label'),
+    'arbetstidvaraktighet': fields.String('description.conditions'),
+    'tilltrade': fields.String(attribute='description.conditions'),
+    'lonetyp': fields.String(attribute='salary_type.label'),
+})
+
+ansokan = api.model('ansokan', {
+    'referens': fields.String(attribute='application_details.reference'),
+    'webbadress': fields.String(attribute='application_details.url'),
+    'epostadress': fields.String(attribute='application_details.email'),
+    'sista_ansokningsdag': fields.DateTime(attribute='application_deadline'),
+    'ovrigt_om_ansokan': fields.String(attribute='application_details.other')
+})
+
+arbetsplats = api.model('arbetsplats', {
+    'arbetsplatsnamn': fields.String(attribute='employer.workplace'),
+    'postnummer': fields.String(attribute='workplace_address.postcode'),
+    'postadress': fields.String(attribute='workplace_address.street_address'),
+    'postort': fields.String(attribute='workplace_address.city'),
+    'postland': fields.String(attribute='workplace_address.country'),
+    'telefonnummer': fields.String(attribute='employer.phone_number'),
+    'epostadress': fields.String(attribute='employer.email'),
+    'hemsida': fields.String(attribute='employer.url'),
+})
+
+korkortslista = api.model('korkortslista', {
+    'korkortstyp': fields.String(attribute='label')
+})
+
+krav = api.model('krav', {
+    'egenbil': fields.Boolean(attribute='access_to_own_car'),
+    'korkortslista': fields.List(fields.Nested(korkortslista),
+                                 attribute='driving_license'),
+})
+
+annonsdata = api.model('annonsdata', {
+    'annons': fields.Nested(annons, attribute='_source', skip_none=True),
+    'villkor': fields.Nested(annonsvillkor, attribute='_source', skip_none=True),
+    'ansokan': fields.Nested(ansokan, attribute='_source', skip_none=True),
+    'arbetsplats': fields.Nested(arbetsplats, attribute='_source', skip_none=True),
+    'krav': fields.Nested(krav, attribute='_source', skip_none=True),
+})
 
 platsannons = api.model('platsannons', {
-    'annons': fields.Nested(annons, attribute='_source')
+    'platsannons': fields.Nested(annonsdata, attribute='elastic_result')
 })

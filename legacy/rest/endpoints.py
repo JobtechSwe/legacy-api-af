@@ -1,4 +1,5 @@
 import logging
+from flask import request
 from flask_restplus import Resource, abort
 from legacy.rest import (ns_legacy, kommunlista_query, yrkesgrupp_query, yrkes_query,
                          legacy_query)
@@ -88,4 +89,14 @@ class ShowPlatsannons(Resource):
 
     @ns_legacy.marshal_with(model.platsannons)
     def get(self, platsannonsid):
-        return repository.fetch_platsannons(platsannonsid)
+        r = repository.fetch_platsannons(platsannonsid)
+        return r
+
+
+@ns_legacy.route('version')
+class ShowVersion(Resource):
+    def get(self):
+        if request.headers['Accept'] in ['*/*', 'text/plain']:
+            return "version: 1.1.0"
+        else:
+            return {"platsannonser": {"version": "1.1.0"}}
