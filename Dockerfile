@@ -10,13 +10,10 @@ RUN apk update && \
         nginx \
         git \
         curl \
-        memcached \
         tzdata && \
      rm -rfv /var/cache/apk/*
 
-ARG flask_app=sokannonser
-ENV flask_app=$flask_app \
-    TZ=Europe/Paris
+ENV TZ=Europe/Paris
 
 COPY . /app
 
@@ -37,15 +34,11 @@ RUN date +"%Y-%m-%dT%H:%M:%S %Z" && \
 
 WORKDIR /app
 
-# RUN pip3 install --no-cache-dir -r requirements.txt
-# delete all __pycache__-folders in tests-folder
-# runs unit tests with @pytest.mark.unit annotation only
-
-RUN echo "" && echo $flask_app && echo "module = $flask_app" >> uwsgi.ini && \
-    time pip3 install -r requirements.txt && \
-    find tests -type d -name __pycache__ -prune -exec rm -rf -vf {} \; && \
-    python3 -m pytest -svv -m unit tests/ && \
-    find tests -type d -name __pycache__ -prune -exec rm -rf -vf {} \;
+RUN echo "" && echo $flask_app && \
+    time pip3 install -r requirements.txt
+# RUN find tests -type d -name __pycache__ -prune -exec rm -rf -vf {} \; && \
+#     python3 -m pytest -svv -m unit tests/ && \
+#     find tests -type d -name __pycache__ -prune -exec rm -rf -vf {} \;
 
 
 USER 10000
