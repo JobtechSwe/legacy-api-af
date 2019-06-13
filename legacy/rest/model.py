@@ -10,7 +10,7 @@ class BaseUrl(fields.Raw):
 
 
 # Search results
-matchningsdata = api.model('matchnindsdata', {
+matchningsdata = api.model('matchningsdata', {
     'annonsid': fields.String(attribute='_source.id'),
     'annonsrubrik': fields.String(attribute='_source.headline'),
     'yrkesbenamnning': fields.String(attribute='_source.occupation.label'),

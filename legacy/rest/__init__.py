@@ -14,7 +14,13 @@ ns_legacy = Namespace('Legacy API', description='Feature replicated legacy API')
 
 def output_xml(data, code, headers=None):
     """Makes a Flask response with a XML encoded body"""
-    resp = make_response(dumps(data), code)
+    xml = dumps(data)
+    # simplexml lacks ability to insert encoding and standalone,
+    # so this is a hack
+    xml_with_headers = "%s%s%s" % (xml[0:19],
+                                   ' encoding="utf-8" standalone="yes"',
+                                   xml[19:])
+    resp = make_response(xml_with_headers, code)
     resp.headers.extend(headers or {})
     return resp
 
