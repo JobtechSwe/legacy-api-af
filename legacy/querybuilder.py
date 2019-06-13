@@ -6,7 +6,7 @@ from legacy import settings
 log = logging.getLogger(__name__)
 
 
-def build_query(args, offset, size, start_from=None, sort_by_id = False):
+def build_query(args, offset, size, start_from=None, sort_by_id=False):
     dsl = {"query": {"bool": {"must": []}}, "track_total_hits": True,
            "from": offset, "size": size}
     if sort_by_id:
@@ -67,12 +67,13 @@ def build_query(args, offset, size, start_from=None, sort_by_id = False):
     if args['nyckelord']:
         dsl['query']['bool']['must'].append(_build_freetext_query(args['nyckelord']))
 
-    log.debug("QUERY: %s" % json.dumps(dsl, indent=2))
+    log.debug("ARGS %s => QUERY: %s" % (args, json.dumps(dsl)))
     return dsl
 
 
 def _build_freetext_query(querystring):
-    bool_struct = [re.split(' AND ', w) for w in [g for g in re.split(' OR ', querystring) if g.strip()]]
+    bool_struct = [re.split(' AND ', w)
+                   for w in [g for g in re.split(' OR ', querystring) if g.strip()]]
     shoulds = {"bool": {"should": []}}
     for should in bool_struct:
         musts = {"bool": {"must": []}}
