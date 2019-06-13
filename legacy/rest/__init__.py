@@ -17,8 +17,8 @@ def output_xml(data, code, headers=None):
     xml = dumps(data)
     # simplexml lacks ability to insert encoding and standalone,
     # so this is a hack
-    xml_with_headers = "%s%s%s" % (xml[0:19],
-                                   ' encoding="utf-8" standalone="yes"',
+    xml_with_headers = "%s%s%s" % (xml[0:20],
+                                   'encoding="utf-8" standalone="yes"',
                                    xml[19:])
     resp = make_response(xml_with_headers, code)
     resp.headers.extend(headers or {})
