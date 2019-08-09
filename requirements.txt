@@ -9,6 +9,6 @@ python-dateutil
 pytest
 pytest-cov
 pytest-envfiles
-elastic-apm[flask]==4.1.0
+elastic-apm[flask]
 urllib3==1.24.2
 python-simplexml
