@@ -10,7 +10,7 @@ class BaseUrl(fields.Raw):
 
 
 # Search results
-matchningsdata = api.model('matchningsdata', {
+matchningsdata = api.model('Matchningsdata', {
     'annonsid': fields.String(attribute='_source.id'),
     'annonsrubrik': fields.String(attribute='_source.headline'),
     'yrkesbenamnning': fields.String(attribute='_source.occupation.label'),
@@ -31,7 +31,7 @@ matchningsdata = api.model('matchningsdata', {
     'anstallningstyp': fields.String(attribute='_source.employment_type.label'),
 })
 
-resultat = api.model('resultat', {
+resultat = api.model('Resultat', {
     'antal_platsannonser': fields.Integer(attribute='meta.total_hits'),
     'antal_platsannonser_exakta': fields.Integer(attribute='meta.total_hits'),
     'antal_platsannonser_narliggande': fields.Integer(default=0),
@@ -40,12 +40,12 @@ resultat = api.model('resultat', {
     'matchningsdata': fields.List(fields.Nested(matchningsdata), attribute='hits')
 })
 
-matchningslista = api.model('matchningslista', {
+matchningslista = api.model('Matchningslista', {
     'matchningslista': fields.Nested(resultat, attribute='hits')
 })
 
 # Show jobad
-annons = api.model('annons', {
+annons = api.model('Annons', {
     'annonsid': fields.String(attribute='id'),
     'platsannonsUrl': BaseUrl(attribute='id'),
     'annonsrubrik': fields.String(attribute='headline'),
@@ -60,7 +60,7 @@ annons = api.model('annons', {
     'anstallningstyp': fields.String(attribute='employment_type.label')
 })
 
-annonsvillkor = api.model('villkor', {
+annonsvillkor = api.model('Villkor', {
     'varaktighet': fields.String(attribute='duration.label'),
     'arbetstid': fields.String(attribute='working_hours_type.label'),
     'arbetstidvaraktighet': fields.String('description.conditions'),
@@ -68,7 +68,7 @@ annonsvillkor = api.model('villkor', {
     'lonetyp': fields.String(attribute='salary_type.label'),
 })
 
-ansokan = api.model('ansokan', {
+ansokan = api.model('Ansokan', {
     'referens': fields.String(attribute='application_details.reference'),
     'webbadress': fields.String(attribute='application_details.url'),
     'epostadress': fields.String(attribute='application_details.email'),
@@ -76,7 +76,7 @@ ansokan = api.model('ansokan', {
     'ovrigt_om_ansokan': fields.String(attribute='application_details.other')
 })
 
-arbetsplats = api.model('arbetsplats', {
+arbetsplats = api.model('Arbetsplats', {
     'arbetsplatsnamn': fields.String(attribute='employer.workplace'),
     'postnummer': fields.String(attribute='workplace_address.postcode'),
     'postadress': fields.String(attribute='workplace_address.street_address'),
@@ -87,17 +87,17 @@ arbetsplats = api.model('arbetsplats', {
     'hemsida': fields.String(attribute='employer.url'),
 })
 
-korkortslista = api.model('korkortslista', {
+korkortslista = api.model('Korkortslista', {
     'korkortstyp': fields.String(attribute='label')
 })
 
-krav = api.model('krav', {
+krav = api.model('Krav', {
     'egenbil': fields.Boolean(attribute='access_to_own_car'),
     'korkortslista': fields.List(fields.Nested(korkortslista),
                                  attribute='driving_license'),
 })
 
-annonsdata = api.model('annonsdata', {
+annonsdata = api.model('Annonsdata', {
     'annons': fields.Nested(annons, attribute='_source', skip_none=True),
     'villkor': fields.Nested(annonsvillkor, attribute='_source', skip_none=True),
     'ansokan': fields.Nested(ansokan, attribute='_source', skip_none=True),
@@ -105,6 +105,6 @@ annonsdata = api.model('annonsdata', {
     'krav': fields.Nested(krav, attribute='_source', skip_none=True),
 })
 
-platsannons = api.model('platsannons', {
+platsannons = api.model('Platsannons', {
     'platsannons': fields.Nested(annonsdata, attribute='elastic_result')
 })
