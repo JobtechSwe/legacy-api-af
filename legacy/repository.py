@@ -182,7 +182,7 @@ def _find_highest_id(query_args, offset, size):
             last_id = hits[0]['_id']
             log.debug("Updating last id for pagination: %s" % last_id)
             log.debug("Pagination: Filter from %s with new offset: %d" % (last_id, next_offset))
-    return (last_id, next_offset)
+    return last_id, next_offset
 
 
 def matcha(query_args, sida=1, size=20):
@@ -235,12 +235,10 @@ def _get_correct_logo_url(ad_id):
 
     logo_url = None
     if ad and 'employer' in ad:
-        log.debug("Trying to find employer details.")
         if 'organization_number' in ad['employer'] and ad['employer']['organization_number']:
             org_number = ad['employer']['organization_number']
             eventual_logo_url = '%sorganisation/%s/logotyper/logo.png' % (settings.COMPANY_LOGO_BASE_URL, org_number)
             r = requests.head(eventual_logo_url, timeout=15)
-            log.debug("Status code: %s" % r.status_code)
             if r.status_code == 200:
                 logo_url = eventual_logo_url
     return logo_url
@@ -259,7 +257,6 @@ def _get_not_found_logo_file():
 
 def fetch_platsannons_logo(ad_id):
     logo_url = _get_correct_logo_url(ad_id)
-    log.debug("Determined logo URL: %s" % logo_url)
 
     attachment_filename = 'logo.png'
     mimetype = 'image/png'
