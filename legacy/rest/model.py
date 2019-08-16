@@ -23,7 +23,7 @@ matchningsdata = api.model('Matchningsdata', {
     'sista_ansokningsdag': fields.Date(attribute='_source.application_deadline'),
     'annonsurl': BaseUrl(attribute='_source.id'),
     'relevans': fields.Integer(attribute='relevans', default=100),
-    'antalPlatser': fields.Integer(attribute='_source.number_of_vacancies'),
+    'antalPlatser': fields.String(attribute='_source.number_of_vacancies'),
     'antalPlatserVisa': fields.Integer(attribute='_source.number_of_vacancies'),
     'varaktighetId': fields.Integer(attribute='_source.duration.legacy_ams_taxonomy_id'),
     'lanid': fields.Integer(attribute='_source.workplace_address.region_code'),
