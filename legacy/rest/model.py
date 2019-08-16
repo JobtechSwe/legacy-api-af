@@ -53,7 +53,7 @@ annons = api.model('Annons', {
     'yrkesbenamning': fields.String(attribute='occupation.label'),
     'yrkesid': fields.Integer(attribute='occupation.legacy_ams_taxonomy_id'),
     'publiceraddatum': fields.DateTime(attribute='publication_date'),
-    'antal_platser': fields.Integer(attribute='number_of_vacancies'),
+    'antal_platser': fields.String(attribute='number_of_vacancies'),
     'kommunnamn': fields.String(attribute='workplace_address.municipality'),
     'kommunkod': fields.Integer(attribute='workplace_address.municipality_code'),
     'antalplatserVisa': fields.Integer(default=1),
@@ -70,7 +70,7 @@ annonsvillkor = api.model('Villkor', {
 
 ansokan = api.model('Ansokan', {
     'referens': fields.String(attribute='application_details.reference'),
-    'webbadress': fields.String(attribute='application_details.url'),
+    'webbplats': fields.String(attribute='application_details.url'),
     'epostadress': fields.String(attribute='application_details.email'),
     'sista_ansokningsdag': fields.DateTime(attribute='application_deadline'),
     'ovrigt_om_ansokan': fields.String(attribute='application_details.other')
