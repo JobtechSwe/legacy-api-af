@@ -8,6 +8,10 @@ ES_PWD = os.getenv("ES_PWD")
 ES_INDEX = os.getenv("ES_INDEX", "platsannons-read")
 ES_TAX_INDEX = os.getenv("ES_TAX_INDEX", "taxonomy")
 
+# Logo backend setting
+COMPANY_LOGO_BASE_URL = os.getenv('COMPANY_LOGO_BASE_URL',
+                                  'https://www.arbetsformedlingen.se/rest/arbetsgivare/rest/af/v3/')
+
 # Flask-Restplus settings
 RESTPLUS_SWAGGER_UI_DOC_EXPANSION = 'list'
 RESTPLUS_VALIDATE = False

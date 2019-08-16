@@ -1,12 +1,17 @@
 import logging
 import certifi
 import json
+import io
+import os
+import requests
 from ssl import create_default_context
 from elasticsearch import Elasticsearch, exceptions
+from flask import send_file
 from flask_restplus import abort
 from legacy import settings, querybuilder
 
 log = logging.getLogger(__name__)
+not_found_file = None
 
 log.info("Using Elasticsearch node at %s:%s" % (settings.ES_HOST, settings.ES_PORT))
 if settings.ES_USER and settings.ES_PWD:
@@ -19,7 +24,7 @@ else:
     elastic = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
 
-def lista_lan(listnamn):
+def lista_lan():
     (antal_annons, antal_plats) = _get_total_hits(
         {
             'bool': {
@@ -35,7 +40,7 @@ def lista_lan(listnamn):
     return _build_list("lan", antal_annons, antal_plats, lanlista)
 
 
-def lista_lan2(listnamn):
+def lista_lan2():
     (antal_annons, antal_plats) = _get_total_hits()
     lanlista = _load_taxonomy("region", None, None,
                               settings.WORKPLACE_ADDRESS_REGION_CODE, 2)
@@ -221,6 +226,57 @@ def fetch_platsannons(ad_id):
         abort(500, 'Failed to establish connection to database')
         return
     return elastic.get()
+
+
+def _get_correct_logo_url(ad_id):
+    result = fetch_platsannons(ad_id)
+
+    ad = result.get('elastic_result', {}).get('_source', {})
+
+    logo_url = None
+    if ad and 'employer' in ad:
+        log.debug("Trying to find employer details.")
+        if 'organization_number' in ad['employer'] and ad['employer']['organization_number']:
+            org_number = ad['employer']['organization_number']
+            eventual_logo_url = '%sorganisation/%s/logotyper/logo.png' % (settings.COMPANY_LOGO_BASE_URL, org_number)
+            r = requests.head(eventual_logo_url, timeout=15)
+            log.debug("Status code: %s" % r.status_code)
+            if r.status_code == 200:
+                logo_url = eventual_logo_url
+    return logo_url
+
+
+def _get_not_found_logo_file():
+    global not_found_file
+    currentdir = os.path.dirname(os.path.realpath(__file__)) + '/'
+    if not_found_file is None:
+        not_found_filepath = currentdir + "resources/1x1-00000000.png"
+        log.debug('Opening global file %s' % not_found_filepath)
+        not_found_file = open(not_found_filepath, 'rb')
+        not_found_file = not_found_file.read()
+    return not_found_file
+
+
+def fetch_platsannons_logo(ad_id):
+    logo_url = _get_correct_logo_url(ad_id)
+    log.debug("Determined logo URL: %s" % logo_url)
+
+    attachment_filename = 'logo.png'
+    mimetype = 'image/png'
+
+    if logo_url is None:
+        return send_file(
+            io.BytesIO(_get_not_found_logo_file()),
+            attachment_filename=attachment_filename,
+            mimetype=mimetype
+        )
+    else:
+        r = requests.get(logo_url, stream=True)
+        return send_file(
+            io.BytesIO(r.raw.read(decode_content=False)),
+            attachment_filename=attachment_filename,
+            mimetype=mimetype
+        )
 
 
 def _calculate_offset(pagenumber, rows):

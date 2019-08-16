@@ -14,14 +14,14 @@ log = logging.getLogger(__name__)
 class SoklistaLan(Resource):
 
     def get(self):
-        return repository.lista_lan('lan')
+        return repository.lista_lan()
 
 
 @ns_legacy.route('soklista/lan2')
 class SoklistaLan2(Resource):
 
     def get(self):
-        return repository.lista_lan2('lan2')
+        return repository.lista_lan2()
 
 
 @ns_legacy.route('soklista/kommuner')
@@ -91,6 +91,14 @@ class ShowPlatsannons(Resource):
     def get(self, platsannonsid):
         r = repository.fetch_platsannons(platsannonsid)
         return r
+
+
+@ns_legacy.route('<platsannonsid>/logotyp')
+class ShowPlatsannonsLogotyp(Resource):
+
+    def get(self, platsannonsid):
+        print("Showing logo %s" % platsannonsid)
+        return repository.fetch_platsannons_logo(platsannonsid)
 
 
 @ns_legacy.route('version')
