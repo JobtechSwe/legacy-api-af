@@ -28,8 +28,8 @@ RUN date +"%Y-%m-%dT%H:%M:%S %Z" && \
     chmod -R 777 /usr/sbin && \
     chmod -R 775 /usr/lib/python* && \
     chmod -R 775 /var/lib/nginx && \
-    mkdir -p /var/lib/nginx/tmp/client_body /var/lib/nginx/tmp/proxy && \
-    chmod -R 775 /var/lib/nginx/tmp/client_body /var/lib/nginx/tmp/proxy && \
+    mkdir -p /var/lib/nginx/tmp/client_body /var/lib/nginx/tmp/proxy /var/lib/nginx/tmp/fastcgi && \
+    chmod -R 775 /var/lib/nginx/tmp/* && \
     chmod -R 777 /var/log/* && \
     mkdir -p /var/tmp/nginx && \
     chmod -R 777 /var/tmp/nginx
