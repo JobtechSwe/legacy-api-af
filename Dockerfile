@@ -13,7 +13,7 @@ RUN apk update && \
         tzdata && \
      rm -rfv /var/cache/apk/*
 
-ENV TZ=Europe/Paris
+ENV TZ=Europe/Stockholm
 
 COPY . /app
 
@@ -28,6 +28,8 @@ RUN date +"%Y-%m-%dT%H:%M:%S %Z" && \
     chmod -R 777 /usr/sbin && \
     chmod -R 775 /usr/lib/python* && \
     chmod -R 775 /var/lib/nginx && \
+    mkdir -p /var/lib/nginx/tmp/ && \
+    chmod -R -775 /var/lib/nginx/tmp && \
     chmod -R 777 /var/log/* && \
     mkdir -p /var/tmp/nginx && \
     chmod -R 777 /var/tmp/nginx
@@ -35,8 +37,7 @@ RUN date +"%Y-%m-%dT%H:%M:%S %Z" && \
 
 WORKDIR /app
 
-RUN echo "" && echo $flask_app && \
-    time pip3 install -r requirements.txt
+RUN  time pip3 install -r requirements.txt
 # RUN find tests -type d -name __pycache__ -prune -exec rm -rf -vf {} \; && \
 #     python3 -m pytest -svv -m unit tests/ && \
 #     find tests -type d -name __pycache__ -prune -exec rm -rf -vf {} \;
