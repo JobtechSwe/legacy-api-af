@@ -1,6 +1,7 @@
 import logging
 import re
 import json
+from datetime import datetime
 from legacy import settings
 
 log = logging.getLogger(__name__)
@@ -60,8 +61,12 @@ def build_query(args, offset, size, start_from=None, sort_by_id=False):
             )
 
     if args['sokdatum']:
+        try:
+            sokdatum_date = datetime.strptime(args['sokdatum'], '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            sokdatum_date = datetime.strptime(args['sokdatum'], '%Y-%m-%d %H:%M')
         dsl['query']['bool']['filter'].append(
-            {"range": {settings.PUBLICATION_DATE: {"gte": args['sokdatum'].isoformat()}}}
+            {"range": {settings.PUBLICATION_DATE: {"gte": sokdatum_date.isoformat()}}}
         )
 
     if args['nyckelord']:
