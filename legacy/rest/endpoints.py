@@ -74,6 +74,8 @@ class Matchning(Resource):
         args = legacy_query.parse_args()
         sida = args.pop('sida')
         rader = args.pop('antalrader')
+        if sida == 0:
+            sida = 1
         if sida < 1:
             abort(400, "Parametern sida måste vara större än noll.")
         if not any(v is not None for v in args.values()):

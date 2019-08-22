@@ -219,8 +219,20 @@ def fetch_platsannons(ad_id):
         if query_result and '_source' in query_result:
             return {"elastic_result": query_result}
         else:
-            log.info("Job ad %s not found, returning 404 message" % ad_id)
-            abort(404, 'Platsannons saknas')
+            ext_id_query = {
+                'query': {
+                    'term': {
+                        'external_id': ad_id
+                    }
+                }
+            }
+            query_result = elastic.search(index=settings.ES_INDEX, body=ext_id_query)
+            hits = query_result.get('hits', {}).get('hits', [])
+            if hits:
+                return {"elastic_result": hits[0]}
+
+        log.info("Job ad %s not found, returning 404 message" % ad_id)
+        abort(404, 'Platsannons saknas')
     except exceptions.ConnectionError as e:
         logging.exception('Failed to connect to elasticsearch: %s' % str(e))
         abort(500, 'Failed to establish connection to database')
