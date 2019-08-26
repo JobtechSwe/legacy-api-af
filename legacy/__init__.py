@@ -5,10 +5,12 @@ from elasticapm.contrib.flask import ElasticAPM
 from jobtech.common.customlogging import configure_logging
 from legacy.rest import api
 from legacy import settings
+from .middleware import StripContentTypeMiddleware as strip_content_type
 # Import all Resources that are to be made visible for the app
 from legacy.rest.endpoints import SoklistaLan
 
 app = Flask(__name__)
+app.wsgi_app = strip_content_type(app.wsgi_app)
 CORS(app)
 configure_logging([__name__.split('.')[0], 'sokannonser', 'jobtech'])
 log = logging.getLogger(__name__)
