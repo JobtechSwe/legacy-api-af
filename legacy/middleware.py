@@ -19,11 +19,8 @@ class StripContentTypeMiddleware:
         """Run the middleware and then call the original WSGI application."""
 
         if environ['REQUEST_METHOD'] == 'GET':
-            print(environ)
-            print('======')
             if 'HTTP_CONTENT_TYPE' in environ:
                 del environ['HTTP_CONTENT_TYPE']
             if 'CONTENT_TYPE' in environ:
                 del environ['CONTENT_TYPE']
-            print(environ)
         return self.app(environ, start_response)
