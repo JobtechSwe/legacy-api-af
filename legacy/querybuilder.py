@@ -51,7 +51,6 @@ def build_query(args, offset, size, start_from=None, sort_by_id=False):
                ('varaktighetid', settings.DURATION + ".legacy_ams_taxonomy_id", 0),
                ('anstallningstyp',
                 settings.EMPLOYMENT_TYPE + ".legacy_ams_taxonomy_id", 0),
-               ('organisationsnummer', settings.EMPLOYER_ORGANIZATION_NUMBER, 0),
                ]:
         if args[qp[0]]:
             dsl['query']['bool']['must'].append(
@@ -59,7 +58,13 @@ def build_query(args, offset, size, start_from=None, sort_by_id=False):
                     qp[1]: str(args[qp[0]]).zfill(qp[2])
                 }}
             )
-
+    if args['organisationsnummer']:
+        qp = ('organisationsnummer', settings.EMPLOYER_ORGANIZATION_NUMBER, 0)
+        dsl['query']['bool']['must'].append(
+            {"term": {
+                qp[1]: str(args[qp[0]]).translate(str.maketrans('', '', '-')).zfill(qp[2])
+                }}
+            )
     if args['sokdatum']:
         try:
             sokdatum_date = datetime.strptime(args['sokdatum'], '%Y-%m-%d %H:%M:%S')
