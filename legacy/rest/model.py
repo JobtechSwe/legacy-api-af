@@ -13,8 +13,8 @@ class BaseUrl(fields.Raw):
 matchningsdata = api.model('Matchningsdata', {
     'annonsid': fields.String(attribute='_source.id'),
     'annonsrubrik': fields.String(attribute='_source.headline'),
-    'yrkesbenamnning': fields.String(attribute='_source.occupation.label'),
-    'yrkesbenamnningId': fields.Integer(
+    'yrkesbenamning': fields.String(attribute='_source.occupation.label'),
+    'yrkesbenamningId': fields.Integer(
         attribute='_source.occupation.legacy_ams_taxonomy_id'),
     'arbetsplatsnamn': fields.String(attribute='_source.employer.workplace'),
     'kommunnamn': fields.String(attribute='_source.workplace_address.municipality'),
