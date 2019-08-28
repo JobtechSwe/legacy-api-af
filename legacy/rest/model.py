@@ -37,7 +37,7 @@ resultat = api.model('Resultat', {
     'antal_platsannonser_narliggande': fields.Integer(default=0),
     'antal_platserTotal': fields.Integer(attribute='meta.number_of_positions'),
     'antal_sidor': fields.Integer(attribute='meta.number_of_pages'),
-    'matchningsdata': fields.List(fields.Nested(matchningsdata), attribute='hits')
+    'matchningdata': fields.List(fields.Nested(matchningsdata), attribute='hits')
 })
 
 matchningslista = api.model('Matchningslista', {
