@@ -82,6 +82,20 @@ def build_query(args, offset, size, start_from=None, sort_by_id=False):
 
 
 def _build_freetext_query(querystring):
+    """
+    Parses the freetext argument 'nyckelord' in the following ways:
+    'word1 AND word2' => word1 and word2
+    '"word1"AND"word2"' => word1 and word2
+    '"word1 word2"' => word1 and word2
+    'word1 OR word2' => word1 or word2
+    '"word1"OR"word2"' => word1 or word2
+    '"word1""word2"' => word1 or word2
+    """
+    querystring = querystring.strip('"')
+    querystring = querystring.replace('"AND"', ' AND ')
+    querystring = querystring.replace('"OR"', ' OR ')
+    querystring = querystring.replace('""', ' OR ')
+
     bool_struct = [re.split(' AND ', w)
                    for w in [g for g in re.split(' OR ', querystring) if g.strip()]]
     shoulds = {"bool": {"should": []}}
