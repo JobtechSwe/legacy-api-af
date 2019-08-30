@@ -67,18 +67,28 @@ def build_query(args, offset, size, start_from=None, sort_by_id=False):
             )
     if args['sokdatum']:
         try:
-            sokdatum_date = datetime.strptime(args['sokdatum'], '%Y-%m-%d %H:%M:%S')
+            sokdatum_date = _format_date(args['sokdatum'])
+            dsl['query']['bool']['filter'].append(
+                {"range": {settings.PUBLICATION_DATE: {"gte": sokdatum_date.isoformat()}}}
+            )
         except ValueError:
-            sokdatum_date = datetime.strptime(args['sokdatum'], '%Y-%m-%d %H:%M')
-        dsl['query']['bool']['filter'].append(
-            {"range": {settings.PUBLICATION_DATE: {"gte": sokdatum_date.isoformat()}}}
-        )
+            log.Warning(f"Incorrect date in sokdatum argument: {args['sokdatum']}")
+            pass
 
     if args['nyckelord']:
         dsl['query']['bool']['must'].append(_build_freetext_query(args['nyckelord']))
 
     log.debug("ARGS %s => QUERY: %s" % (args, json.dumps(dsl)))
     return dsl
+
+
+def _format_date(sokdatum):
+    for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d'):
+        try:
+            return datetime.strptime(sokdatum, fmt)
+        except ValueError:
+            pass
+    raise ValueError
 
 
 def _build_freetext_query(querystring):
