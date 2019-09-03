@@ -60,11 +60,13 @@ def build_query(args, offset, size, start_from=None, sort_by_id=False):
             )
     if args['organisationsnummer']:
         qp = ('organisationsnummer', settings.EMPLOYER_ORGANIZATION_NUMBER, 0)
-        dsl['query']['bool']['must'].append(
-            {"term": {
-                qp[1]: str(args[qp[0]]).translate(str.maketrans('', '', '-')).zfill(qp[2])
-                }}
-            )
+        dsl['query']['bool']['must'].append({
+            "prefix": {
+                settings.EMPLOYER_ORGANIZATION_NUMBER: {
+                    "value": str(args[qp[0]]).translate(str.maketrans('', '', '-')).zfill(qp[2])
+                }
+            }
+        })
     if args['sokdatum']:
         try:
             sokdatum_date = _format_date(args['sokdatum'])
