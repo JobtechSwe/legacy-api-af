@@ -99,7 +99,7 @@ class ShowPlatsannons(Resource):
 class ShowPlatsannonsLogotyp(Resource):
 
     def get(self, platsannonsid):
-        log.info("Showing logo %s" % platsannonsid)
+        log.debug("Showing logo %s" % platsannonsid)
         return repository.fetch_platsannons_logo(platsannonsid)
 
 
