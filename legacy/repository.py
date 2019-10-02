@@ -156,7 +156,7 @@ def _calculate_pages(args, size):
     number_of_pages = (total_hits // size + (total_hits % size > 0)
                        if size else 0)
     positions = response['aggregations']['positions']['value']
-    return (total_hits, number_of_pages, positions)
+    return total_hits, number_of_pages, positions
 
 
 def _find_highest_id(query_args, offset, size):
